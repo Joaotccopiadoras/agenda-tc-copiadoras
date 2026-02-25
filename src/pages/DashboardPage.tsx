@@ -114,31 +114,38 @@ export default function DashboardPage() {
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [page, setPage] = useState(0);
 
-  // 1. BUSCA DOS DADOS NO SUPABASE (AGORA COM FILTRO DE USUÁRIO)
+  // 1. BUSCA DOS DADOS NO SUPABASE (COM FILTRO ATIVADO)
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
         
-        // 1. Descobrir quem é o usuário logado
+        // 1. Descobrir quem é o usuário logado no sistema
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user || !user.email) return; 
         setUsuarioAtual(user);
 
-        // 2. Buscar APENAS os cards onde o email do líder bate com o email logado
-        // (Você também pode filtrar por lider_uuid se criar uma tabela de "De Para" no banco)
+        // 2. Buscar todos os dados da tabela
         const { data, error } = await supabase
             .from('programacao_joaogaia')
             .select('*')
-            // .ilike('lider_email', `%${user.email}%`) // Descomente esta linha se o n8n estiver salvando o email corretamente
             .order('data_entrada', { ascending: false });
             
         if (error) throw error;
         
-        // Filtro em memória (caso prefira fazer no front)
-        // const dadosFiltrados = data.filter(item => item.lider_email?.toLowerCase() === user.email?.toLowerCase());
-        
-        if (data) setAllData(data); // Se usar o filtro acima, troque 'data' por 'dadosFiltrados'
+        // 3. A MÁGICA ACONTECE AQUI: O Filtro Rigoroso
+        if (data) {
+           // O React vai olhar linha por linha (item).
+           // Se o 'lider_email' gravado no card for igual ao e-mail de quem fez o login, o card fica. 
+           // Se não for igual, o card é sumariamente descartado.
+           const dadosFiltrados = data.filter(item => {
+               if (!item.lider_email) return false; // Se o card não tem email do líder, esconde
+               return item.lider_email.toLowerCase().trim() === user.email?.toLowerCase().trim();
+           });
+           
+           // Coloca APENAS os dados filtrados na tela
+           setAllData(dadosFiltrados); 
+        }
 
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
@@ -392,7 +399,7 @@ export default function DashboardPage() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-8">
       
      {/* CABEÇALHO */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           <img src="/logo.png" alt="Logo" className="h-12 object-contain" />
           <div>
@@ -401,10 +408,20 @@ export default function DashboardPage() {
           </div>
         </div>
         
-        {/* BOTÃO DE SAIR ADICIONADO AQUI */}
-        <Button variant="outline" onClick={HandleSair} className="text-red-600 hover:bg-red-50 border-red-200">
-          <LogOut className="h-4 w-4 mr-2" /> Sair
-        </Button>
+        <div className="flex items-center gap-4">
+          {/* ✨ AQUI ESTAMOS USANDO A VARIÁVEL usuarioAtual ✨ */}
+          {usuarioAtual && (
+            <div className="text-sm text-gray-500 hidden sm:block text-right">
+              Logado como:<br/>
+              <strong className="text-gray-800">{usuarioAtual.email}</strong>
+            </div>
+          )}
+          
+          {/* BOTÃO DE SAIR */}
+          <Button variant="outline" onClick={HandleSair} className="text-red-600 hover:bg-red-50 border-red-200">
+            <LogOut className="h-4 w-4 mr-2" /> Sair
+          </Button>
+        </div>
       </div>
 
       {/* ÁREA DE FILTROS */}
