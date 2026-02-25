@@ -114,18 +114,19 @@ export default function DashboardPage() {
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [page, setPage] = useState(0);
 
-  // 1. BUSCA DOS DADOS NO SUPABASE (COM FILTRO ATIVADO)
+  // 1. BUSCA DOS DADOS NO SUPABASE
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
         
-        // 1. Descobrir quem é o usuário logado no sistema
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || !user.email) return; 
         setUsuarioAtual(user);
 
-        // 2. Buscar todos os dados da tabela
+        // RASTREADOR 1: Ver quem o React acha que está logado
+        console.log("🔍 1. Email do usuário logado:", user.email);
+
         const { data, error } = await supabase
             .from('programacao_joaogaia')
             .select('*')
@@ -133,17 +134,18 @@ export default function DashboardPage() {
             
         if (error) throw error;
         
-        // 3. A MÁGICA ACONTECE AQUI: O Filtro Rigoroso
+        // RASTREADOR 2: Ver quantos cards o Supabase deixou sair do banco
+        console.log("📦 2. Cards que vieram do banco:", data?.length, data);
+        
         if (data) {
-           // O React vai olhar linha por linha (item).
-           // Se o 'lider_email' gravado no card for igual ao e-mail de quem fez o login, o card fica. 
-           // Se não for igual, o card é sumariamente descartado.
            const dadosFiltrados = data.filter(item => {
-               if (!item.lider_email) return false; // Se o card não tem email do líder, esconde
+               if (!item.lider_email) return false; 
                return item.lider_email.toLowerCase().trim() === user.email?.toLowerCase().trim();
            });
            
-           // Coloca APENAS os dados filtrados na tela
+           // RASTREADOR 3: Ver quantos cards sobreviveram ao filtro
+           console.log("🎯 3. Cards após o filtro:", dadosFiltrados.length, dadosFiltrados);
+           
            setAllData(dadosFiltrados); 
         }
 
