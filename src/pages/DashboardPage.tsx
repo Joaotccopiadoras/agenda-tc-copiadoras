@@ -154,8 +154,8 @@ export default function DashboardPage() {
       
       if (dataEntradaInicio && a.data_entrada < dataEntradaInicio) return false;
       if (dataEntradaFim && a.data_entrada > dataEntradaFim + "T23:59:59") return false;
-      if (dataPrevisaoInicio && a.data_previsao < dataPrevisaoInicio) return false;
-      if (dataPrevisaoFim && a.data_previsao > dataPrevisaoFim + "T23:59:59") return false;
+      if (dataPrevisaoInicio && a.previsao_prazo < dataPrevisaoInicio) return false;
+      if (dataPrevisaoFim && a.previsao_prazo > dataPrevisaoFim + "T23:59:59") return false;
       if (dataConclusaoInicio && a.data_conclusao < dataConclusaoInicio) return false;
       if (dataConclusaoFim && a.data_conclusao > dataConclusaoFim + "T23:59:59") return false;
 
@@ -264,7 +264,7 @@ export default function DashboardPage() {
         }
 
         tableRows.push([
-          formatarData(item.data_entrada), formatarData(item.data_previsao), formatarData(item.data_conclusao),
+          formatarData(item.data_entrada), formatarData(item.previsao_prazo), formatarData(item.data_conclusao),
           item.solicitante || "-", item.processo_projeto || "-", item.departamento || "-",
           item.tarefa_atual || "-", formatarStatus(item.status), item.resumo_observacoes || "-"
         ]);
@@ -354,7 +354,7 @@ export default function DashboardPage() {
       worksheet.getRow(5).font = { bold: true };
       filtered.forEach((item) => {
         worksheet.addRow([
-          formatarData(item.data_entrada), formatarData(item.data_previsao), formatarData(item.data_conclusao),
+          formatarData(item.data_entrada), formatarData(item.previsao_prazo), formatarData(item.data_conclusao),
           item.lider_card || "-", item.solicitante || "-", item.processo_projeto || "-",
           item.departamento || "-", item.tarefa_atual || "-", formatarStatus(item.status), item.resumo_observacoes || "-"
         ]);
@@ -456,7 +456,7 @@ export default function DashboardPage() {
             <TableHeader className="bg-gray-50">
               <TableRow>
                 <TableHead onClick={() => handleSort('data_entrada')} className="cursor-pointer hover:bg-gray-100 whitespace-nowrap">Entrada {renderSortIcon('data_entrada')}</TableHead>
-                <TableHead onClick={() => handleSort('data_previsao')} className="cursor-pointer hover:bg-gray-100 whitespace-nowrap">Previsão {renderSortIcon('data_previsao')}</TableHead>
+                <TableHead onClick={() => handleSort('previsao_prazo')} className="cursor-pointer hover:bg-gray-100 whitespace-nowrap">Previsão {renderSortIcon('previsao_prazo')}</TableHead>
                 <TableHead onClick={() => handleSort('solicitante')} className="cursor-pointer hover:bg-gray-100">Solicitante {renderSortIcon('solicitante')}</TableHead>
                 <TableHead onClick={() => handleSort('processo_projeto')} className="cursor-pointer hover:bg-gray-100">Projeto {renderSortIcon('processo_projeto')}</TableHead>
                 <TableHead onClick={() => handleSort('departamento')} className="cursor-pointer hover:bg-gray-100">Depto {renderSortIcon('departamento')}</TableHead>
@@ -478,7 +478,7 @@ export default function DashboardPage() {
                 paginated.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="whitespace-nowrap">{formatarData(a.data_entrada)}</TableCell>
-                    <TableCell className="whitespace-nowrap">{formatarData(a.data_previsao)}</TableCell>
+                    <TableCell className="whitespace-nowrap">{formatarData(a.previsao_prazo)}</TableCell>
                     <TableCell className="text-xs">{a.solicitante || "—"}</TableCell>
                     <TableCell className="font-medium text-xs">{a.processo_projeto || "—"}</TableCell>
                     <TableCell className="text-xs">{a.departamento || "—"}</TableCell>
