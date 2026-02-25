@@ -95,6 +95,7 @@ export default function DashboardPage() {
   }
   const [allData, setAllData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usuarioAtual, setUsuarioAtual] = useState<any>(null);
 
   // Filtros em Array (Multi-seleção) adaptados para a nova tabela
   const [filterLideres, setFilterLideres] = useState<string[]>([]);
@@ -113,15 +114,32 @@ export default function DashboardPage() {
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [page, setPage] = useState(0);
 
-  // 1. BUSCA DOS DADOS NO SUPABASE
+  // 1. BUSCA DOS DADOS NO SUPABASE (AGORA COM FILTRO DE USUÁRIO)
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
-        // Puxando da tabela NOVA
-        const { data, error } = await supabase.from('programacao_joaogaia').select('*').order('data_entrada', { ascending: false });
+        
+        // 1. Descobrir quem é o usuário logado
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        setUsuarioAtual(user);
+
+        // 2. Buscar APENAS os cards onde o email do líder bate com o email logado
+        // (Você também pode filtrar por lider_uuid se criar uma tabela de "De Para" no banco)
+        const { data, error } = await supabase
+            .from('programacao_joaogaia')
+            .select('*')
+            // .ilike('lider_email', `%${user.email}%`) // Descomente esta linha se o n8n estiver salvando o email corretamente
+            .order('data_entrada', { ascending: false });
+            
         if (error) throw error;
-        if (data) setAllData(data);
+        
+        // Filtro em memória (caso prefira fazer no front)
+        // const dadosFiltrados = data.filter(item => item.lider_email?.toLowerCase() === user.email?.toLowerCase());
+        
+        if (data) setAllData(data); // Se usar o filtro acima, troque 'data' por 'dadosFiltrados'
+
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       } finally {
