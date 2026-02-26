@@ -128,7 +128,7 @@ export default function DashboardPage() {
         console.log("🔍 1. Email do usuário logado:", user.email);
 
         const { data, error } = await supabase
-            .from('programacao_joaogaia')
+            .from('programacao_tc')
             .select('*')
             .order('data_entrada', { ascending: false });
             
@@ -162,7 +162,7 @@ export default function DashboardPage() {
     const confirmar = window.confirm("Tem certeza que deseja excluir este registro definitivamente?");
     if (!confirmar) return;
     try {
-      const { error } = await supabase.from('programacao_joaogaia').delete().eq('id', id);
+      const { error } = await supabase.from('programacao_tc').delete().eq('id', id);
       if (error) throw error;
       setAllData(prev => prev.filter(item => item.id !== id));
     } catch (error) {
