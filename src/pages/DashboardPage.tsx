@@ -231,9 +231,10 @@ export default function DashboardPage() {
   const uniqueSolicitantes = [...new Set(allData.map((a) => a.solicitante).filter(Boolean))].sort();
   const uniqueStatus = [...new Set(allData.map((a) => formatarStatus(a.status)).filter(s => s !== "—"))].sort();
 
-  const formatarData = (dataStr: string) => {
+const formatarData = (dataStr: string) => {
     if (!dataStr) return "—";
-    return new Date(dataStr).toLocaleDateString("pt-BR");
+    // O segredo está no { timeZone: 'UTC' } adicionado aqui:
+    return new Date(dataStr).toLocaleDateString("pt-BR", { timeZone: 'UTC' });
   };
 
   const getBase64ImageFromUrl = async (imageUrl: string): Promise<string> => {
